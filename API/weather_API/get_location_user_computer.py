@@ -3,7 +3,6 @@ import re
 
 import requests
 
-from API.urls import IP_API_URL
 
 
 def get_ip() -> str:
@@ -16,7 +15,7 @@ def get_ip() -> str:
 
 def get_location() -> dict:
     ip_user = get_ip()
-    response = requests.get(f'{IP_API_URL}{ip_user}')
+    response = requests.get(f'http://ip-api.com/json/{ip_user}?lang=ru')
     if response.status_code == 200:
         json_response = response.json()
         info_user = {'lat': json_response['lat'],

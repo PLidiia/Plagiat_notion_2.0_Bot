@@ -52,7 +52,7 @@ def get_weather_today(city_entered=None) -> Union[dict, str]:
         return f'{response.status_code}-----{response.reason}'
 
 
-def get_weather_15_day(city_entered=None):
+def get_weather_15_day(city_entered=None) -> Union[dict, str]:
     load_dotenv()
     info_location = get_location()
     if not city_entered:
@@ -64,15 +64,25 @@ def get_weather_15_day(city_entered=None):
             key_location = json_response[0]['Key']
             response = requests.get(f'http://dataservice.accuweather.com/forecasts/v1/daily/5day/{key_location}'
                                     f'?apikey={os.getenv("ACCUWEATHER_KEY")}')
-            json_response_2 = response.json()
-            for daily_weather in json_response_2['DailyForecasts']:
-                data = daily_weather['Date']
-                bad_index = data.index('T')
-                data_need = data[:bad_index]
-                temp_min_need = int(daily_weather['Temperature']['Minimum']['Value'])
-                temp_max_need = int(daily_weather['Temperature']['Maximum']['Value'])
-                print(data_need, temp_min_need - 32, temp_max_need - 32)
-
+            if response.status_code == 200:
+                json_response_2 = response.json()
+                for daily_weather in json_response_2['DailyForecasts']:
+                    data = daily_weather['Date']
+                    bad_index = data.index('T')
+                    data_need = data[:bad_index]
+                    temp_min_need = int(daily_weather['Temperature']['Minimum']['Value'])
+                    temp_max_need = int(daily_weather['Temperature']['Maximum']['Value'])
+                    description = daily_weather['Day']['IconPhrase']
+                    data_weather = {
+                        'Дата дня': data_need,
+                        'Минимальная температура': temp_min_need,
+                        'Максимальная температура': temp_max_need,
+                        'Какая погода сегодня?': description
+                    }
+                    return data_weather
+            else:
+                f'{response.status_code}-----{response.reason}'
         else:
             return f'{response_for_key.status_code}-----{response_for_key.reason}'
+
 

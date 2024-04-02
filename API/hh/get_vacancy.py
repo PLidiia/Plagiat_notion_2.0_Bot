@@ -42,7 +42,7 @@ def get_area_user() -> Union[list, None]:
     return [id, city]
 
 
-def get_vacancies(text):
+def get_vacancies(text) -> Union[list, str]:
     data = get_area_user()
     response = requests.get(
         f'http://api.hh.ru/vacancies?clusters=true&enable_snippets=true'
@@ -50,26 +50,38 @@ def get_vacancies(text):
     if response.status_code == 200:
         json_response = response.json()
         salaries_vacancies = []
-        info_vacancy_response = dict()
+        vacancies_found = []
         for vacancy in json_response['items']:
-            if vacancy['alternate_url'] not in info_vacancy_response:
-                info_vacancy_response[vacancy['alternate_url']] = vacancy['name']
+            middle_salary_vacancy = auxiliary_salary_value(vacancy['salary'])
+            name = vacancy['name']
+            if '(' in name:
+                index_bracket = name.index('(')
+                name = name[:index_bracket]
+            vacancy_dict = {'ссылка для поиска в браузере': vacancy['alternate_url'],
+                            'имя вакансии': name,
+                            'зарплата': middle_salary_vacancy,
+                            'from': vacancy['salary']['from'],
+                            'to': vacancy['salary']['to']}
+            vacancies_found.append(vacancy_dict)
             salaries_vacancies.append(vacancy['salary'])
-        middle_salary = middle_salary_vacancy(salaries_vacancies)
-        return f'{middle_salary} - средняя зарплата в регионе {data[1]}' + f'{info_vacancy_response}'
+        return vacancies_found
+    else:
+        return f'{response.status_code}-----{response.reason}'
 
 
-def middle_salary_vacancy(info_salaries):
+def middle_salary_vacancies(info_salaries) -> int:
     summa_salaries = 0
     for salary_vacancy in info_salaries:
-        if salary_vacancy['from'] and salary_vacancy['to']:
-            middle_cur_vacancy = (salary_vacancy['from'] + salary_vacancy['to']) // 2
-        elif salary_vacancy['to']:
-            middle_cur_vacancy = salary_vacancy['to']
-        else:
-            middle_cur_vacancy = salary_vacancy['from']
+        middle_cur_vacancy = auxiliary_salary_value(salary_vacancy)
         summa_salaries += middle_cur_vacancy
     return summa_salaries // len(info_salaries)
 
 
-
+def auxiliary_salary_value(salary_vacancy) -> int:
+    if salary_vacancy['from'] and salary_vacancy['to']:
+        middle_cur_vacancy = (salary_vacancy['from'] + salary_vacancy['to']) // 2
+    elif salary_vacancy['to']:
+        middle_cur_vacancy = salary_vacancy['to']
+    else:
+        middle_cur_vacancy = salary_vacancy['from']
+    return middle_cur_vacancy

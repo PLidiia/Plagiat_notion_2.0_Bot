@@ -1,5 +1,6 @@
 from aiogram.types import BotCommand
 
 commands = [
-    BotCommand(command='menu', description='Советы как пользоваться')
+    BotCommand(command='help', description='Где найти все методы'),
+    BotCommand(command='start', description='Что делает бот')
 ]

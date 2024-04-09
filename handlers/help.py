@@ -1,6 +1,6 @@
 from aiogram import Router, types, F
 from aiogram.filters import Command
-from handlers.message import help_cmd_message
+from handlers.messages import help_cmd_message
 
 router_help = Router()
 

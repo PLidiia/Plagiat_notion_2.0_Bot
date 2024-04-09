@@ -5,15 +5,17 @@ from aiogram import Bot, Dispatcher
 from dotenv.main import load_dotenv
 
 from common.bot_cmd_list import commands
+from database.models import create_tables
 from handlers.greeting import router
 from handlers.help import router_help
-from database.models import create_tables
+from handlers.manage_tasks import router_manage_tasks
 
 load_dotenv()
 bot = Bot(token=os.getenv('TELEGRAM_BOT_TOKEN'))
 dp = Dispatcher()
 dp.include_router(router)
 dp.include_router(router_help)
+dp.include_router(router_manage_tasks)
 
 
 async def main():

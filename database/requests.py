@@ -14,7 +14,7 @@ async def set_user(tg_id: BigInteger) -> bool:
         return True
 
 
-async def add_task(tg_id: BigInteger, name: str, description='') -> None:
+async def add_task_db(tg_id, name: str, description='') -> None:
     async with async_session() as session:
         task = await session.scalar(select(Task).where(Task.name == name))
         if not task:

@@ -1,7 +1,9 @@
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart
-from handlers.messages import start_cmd_message_existing, start_cmd_message_not_existing
+from aiogram.fsm.context import FSMContext
+
 from database.requests import set_user
+from handlers.messages import start_cmd_message_existing, start_cmd_message_not_existing
 
 router = Router()
 

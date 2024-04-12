@@ -1,9 +1,10 @@
 from aiogram import Router, F
 from aiogram import types
 from aiogram.filters import Command
-
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot_logging.logger import logger
-from database.requests import set_user, add_task_db
+from database.requests import set_user, add_task_db, show_tasks_db
 
 router_manage_tasks = Router()
 
@@ -46,5 +47,24 @@ async def add_task(message: types.Message):
                     logger.log("error",
                                f"Произошла ошибка {str(e)} при записе в бд задачи без описания у пользователя {tg_id}")
     except Exception as e:
-        await logger.log("error", f"Произошла ошибка в хэндлере /add_task{str(e)}")
+        logger.log("error", f"Произошла ошибка в хэндлере /add_task {str(e)}")
+        await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')
+
+
+@router_manage_tasks.message(Command('show_my_tasks'))
+@router_manage_tasks.message(F.text.contains('покажи мои задания'))
+@router_manage_tasks.message(F.text.contains('мои задания'))
+@router_manage_tasks.message(F.text.contains('мои задачи'))
+async def show_my_tasks(message: types.Message):
+    try:
+        tg_id = message.from_user.id
+        logger.log("info", f"Пользователь вошёл в хэндлер /show_my_tasks {tg_id}")
+        tasks = await show_tasks_db(tg_id)
+        if tasks:
+            tasks_key_board = InlineKeyboardBuilder()
+            for task in tasks:
+                tasks_key_board.add(InlineKeyboardButton(text=task.name, callback_data=f'task{task.id}'))
+            return tasks_key_board.adjust(2).as_markup()
+    except Exception as e:
+        logger.log("error", f"Произошла ошибка в хэндлере /show_my_tasks {str(e)}")
         await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

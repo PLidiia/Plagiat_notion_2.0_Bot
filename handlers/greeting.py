@@ -21,4 +21,5 @@ async def start_cmd(message: types.Message):
             logger.log("info", f"{message.from_user.first_name} - пользователь не заходил в бота")
             await message.answer(f'{message.from_user.first_name}, {start_cmd_message_not_existing}')
     except Exception as e:
-        logger.log("error", f"ошибка в хэндлере /start {str(e)}")
+        await logger.log("error", f"ошибка в хэндлере /start {str(e)}")
+        await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

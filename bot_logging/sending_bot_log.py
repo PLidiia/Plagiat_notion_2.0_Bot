@@ -14,7 +14,7 @@ TOKEN = os.getenv("TELEGRAM_BOT_TOKEN_LOGGER")
 hello_router = Router(name='hello')
 
 
-def get_data_log_file():
+def get_data_log_file() -> str:
     with open('telegram_bot.txt', 'r') as logfile:
         data = logfile.readlines()
         clear_data = ''
@@ -37,7 +37,7 @@ class SchedulerMiddleware(BaseMiddleware):
 async def hello(message: Message, bot: Bot, scheduler: AsyncIOScheduler):
     id = message.from_user.id
     data = get_data_log_file()
-    scheduler.add_job(bot.send_message, 'interval', seconds=10, args=(id, str(data)))
+    scheduler.add_job(bot.send_message, 'interval', hours=6, args=(id, str(data)))
 
 
 async def main():

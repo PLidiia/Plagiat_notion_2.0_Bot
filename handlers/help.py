@@ -12,4 +12,5 @@ async def help_cmd(message: types.Message):
         logger.log("info", f"Пользователь {message.from_user.id} зашёл в /help")
         await message.answer(help_cmd_message)
     except Exception as e:
-        logger.log("error", f"произошла ошибка в хэндлере /help {str(e)}")
+        await logger.log("error", f"произошла ошибка в хэндлере /help {str(e)}")
+        await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

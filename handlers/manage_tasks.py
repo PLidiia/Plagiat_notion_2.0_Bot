@@ -46,4 +46,5 @@ async def add_task(message: types.Message):
                     logger.log("error",
                                f"Произошла ошибка {str(e)} при записе в бд задачи без описания у пользователя {tg_id}")
     except Exception as e:
-        logger.log("error", f"Произошла ошибка в хэндлере /add_task{str(e)}")
+        await logger.log("error", f"Произошла ошибка в хэндлере /add_task{str(e)}")
+        await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

@@ -64,7 +64,10 @@ async def show_my_tasks(message: types.Message):
             tasks_key_board = InlineKeyboardBuilder()
             for task in tasks:
                 tasks_key_board.add(InlineKeyboardButton(text=task.name, callback_data=f'task{task.id}'))
-            return tasks_key_board.adjust(2).as_markup()
+            kb = tasks_key_board.adjust(2).as_markup()
+            await message.answer("Вот ваши задачи", reply_markup=kb)
+        else:
+            await message.answer("Вы ещё не создавали задачи, обратитесь к хэндлеру /add_task")
     except Exception as e:
         logger.log("error", f"Произошла ошибка в хэндлере /show_my_tasks {str(e)}")
         await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

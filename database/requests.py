@@ -28,7 +28,8 @@ async def add_task_db(tg_id: Union[BigInteger, int], name: str, description='') 
 
 async def show_tasks_db(tg_id: Union[BigInteger, int]):
     async with async_session() as session:
-        user = await session.scalar(select(User).where(User.tg_id == tg_id))
-        tasks = await session.scalars(select(Task).order_by(Task.name).where(Task.owner == user.id))
-        await session.commit()
+        query_one = await session.execute(select(User.id).where(User.tg_id == tg_id))
+        id_user = query_one.scalars().fetchall()
+        query = await session.execute(select(Task).where(Task.owner == id_user[0]))
+        tasks = query.scalars().all()
         return tasks

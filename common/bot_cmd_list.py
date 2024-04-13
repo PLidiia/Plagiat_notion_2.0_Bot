@@ -5,5 +5,6 @@ commands = [
     BotCommand(command='start', description='Что делает бот'),
     BotCommand(command='add_task', description='Добавить задачу'),
     BotCommand(command='show_my_tasks', description='Показать задачи'),
-    BotCommand(command='get_diagram_about_job', description='Создать диаграмму зарплат профессии')
+    BotCommand(command='get_diagram_about_job', description='Создать диаграмму зарплат профессии'),
+    BotCommand(command='get_image_place', description='Получите изображения местности')
 ]

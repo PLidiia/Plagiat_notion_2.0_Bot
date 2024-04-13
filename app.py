@@ -10,6 +10,7 @@ from handlers.greeting import router
 from handlers.help import router_help
 from handlers.hh_info import router_hh
 from handlers.manage_tasks import router_manage_tasks
+from handlers.maps_info import router_maps
 
 load_dotenv()
 bot = Bot(token=os.getenv('TELEGRAM_BOT_TOKEN'))
@@ -18,6 +19,7 @@ dp.include_router(router)
 dp.include_router(router_help)
 dp.include_router(router_manage_tasks)
 dp.include_router(router_hh)
+dp.include_router(router_maps)
 
 
 async def main():

@@ -24,6 +24,7 @@ class Task(SqlalchemyBase):
     name: Mapped[str] = mapped_column()
     owner: Mapped[int] = mapped_column(ForeignKey('users.id'))
     description: Mapped[str] = mapped_column()
+    place_on_map: Mapped[str] = mapped_column()
 
 
 async def create_tables():

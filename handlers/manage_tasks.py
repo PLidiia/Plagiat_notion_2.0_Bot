@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from bot_logging.logger import logger
 from database.requests import set_user, add_task_db, show_tasks_db
 
@@ -20,8 +21,8 @@ async def add_task(message: types.Message):
 
         @router_manage_tasks.message(F.text.contains('название:'))
         async def process_task_name(message: types.Message):
-            task_name = message.text
-            await message.answer(f'Вы ввели название задачи: {task_name}')
+            task_name = message.text.split("название: ")[1]
+            await message.answer(f'Вы ввели название задачи:{task_name}')
             await message.answer(
                 'Вы можете написать описание, если хотите просто напишете "да", если нет то напишите "закончили"')
 
@@ -62,12 +63,33 @@ async def show_my_tasks(message: types.Message):
         tasks = await show_tasks_db(tg_id)
         if tasks:
             tasks_key_board = InlineKeyboardBuilder()
-            for task in tasks:
-                tasks_key_board.add(InlineKeyboardButton(text=task.name, callback_data=f'task{task.id}'))
-            kb = tasks_key_board.adjust(2).as_markup()
-            await message.answer("Вот ваши задачи", reply_markup=kb)
+            if len(tasks) <= 100:
+                # venv/Lib/site-packages/aiogram/utils/keyboard.py:299
+                # в библиотеке aiogram есть предел для инлайновых кнопок в конструктуре - это 100
+                for task in tasks:
+                    tasks_key_board.add(
+                        InlineKeyboardButton(text=task.name,
+                                             callback_data=f'task_{task.name}'))
+                kb = tasks_key_board.adjust(2).as_markup()
+                await message.answer("Вот ваши задачи:", reply_markup=kb)
+            else:
+                await message.answer("К сожалению, библиотека aiogram не может вывести такое количество задач, "
+                                     "в отличие от вас, воспользуйтесь  /delete_task")
         else:
             await message.answer("Вы ещё не создавали задачи, обратитесь к хэндлеру /add_task")
     except Exception as e:
         logger.log("error", f"Произошла ошибка в хэндлере /show_my_tasks {str(e)}")
         await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')
+
+
+@router_manage_tasks.callback_query()
+async def edit_task(callback: types.CallbackQuery):
+    try:
+        if 'task_' in callback.data:
+            id_task = callback.data.split('_')[1]
+            await callback.answer(f'{id_task}')
+            await callback.message.answer(f'Вы выбрали задачу, что вы хотите с ней сделать?')
+    except Exception as e:
+        logger.log("error", f"Произошла ошибка в обработчике нажатий в конструктуре задач (функция edit_task) {str(e)}")
+        await callback.message.answer(
+            'Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

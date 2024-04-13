@@ -5,7 +5,8 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot_logging.logger import logger
-from database.requests import set_user, add_task_db, show_tasks_db
+from database.requests import set_user, show_tasks_db
+from handlers.text_keyboard_builder import builder_add_task_name, builder_add_task_description
 
 router_manage_tasks = Router()
 
@@ -17,36 +18,34 @@ async def add_task(message: types.Message):
         tg_id = message.from_user.id
         logger.log("info", f"Пользователь вошёл в хэндлер /add_task {tg_id}")
         await set_user(tg_id)
-        await message.answer('Напишите название задачи по такому шаблону "название: "')
+        name_keyboard = InlineKeyboardBuilder()
+        name_keyboard.add(
+            InlineKeyboardButton(text=builder_add_task_name[0],
+                                 callback_data=builder_add_task_name[0]))
+        kb_name = name_keyboard.as_markup()
+        await message.answer("Начинаем заполнять задачу", reply_markup=kb_name)
 
-        @router_manage_tasks.message(F.text.contains('название:'))
-        async def process_task_name(message: types.Message):
-            task_name = message.text.split("название: ")[1]
-            await message.answer(f'Вы ввели название задачи:{task_name}')
-            await message.answer(
-                'Вы можете написать описание, если хотите просто напишете "да", если нет то напишите "закончили"')
+        @router_manage_tasks.callback_query()
+        async def save_name(callback: types.CallbackQuery):
 
-            @router_manage_tasks.message(F.text.contains('да'))
-            async def process_task_description(message: types.Message):
-                await message.answer(
-                    f'Хорошо, вы хотите написать описание вашей задачи, напишите пожалуйста его по шаблону "описание:"')
+            description_keyboard = InlineKeyboardBuilder()
+            for active in builder_add_task_description:
+                name_keyboard.add(
+                    InlineKeyboardButton(text=active,
+                                         callback_data=active))
+                kb = description_keyboard.as_markup()
+                await callback.message.answer("Что насчёт описания задачи???", reply_markup=kb)
 
-                @router_manage_tasks.message(F.text.contains('описание:'))
-                async def process_order_db_description(message: types.Message):
-                    try:
-                        task_description = message.text
-                        await add_task_db(tg_id, task_name, description=task_description)
-                    except Exception as e:
-                        logger.log("error",
-                                   f"Произошла ошибка {str(e)} при записе в бд задачи с описанием у пользователя {tg_id}")
+                @router_manage_tasks.callback_query(F.data == str(builder_add_task_description[0]))
+                async def save_task_with_description(callback: types.CallbackQuery):
+                    print('fffffff')
+                    task_description = callback.data
+                    await add_task(tg_id, task_name, task_description)
 
-            @router_manage_tasks.message(F.text.contains('закончили'))
-            async def add_task_finish(message: types.Message):
-                try:
-                    await add_task_db(tg_id, task_name)
-                except Exception as e:
-                    logger.log("error",
-                               f"Произошла ошибка {str(e)} при записе в бд задачи без описания у пользователя {tg_id}")
+                @router_manage_tasks.callback_query(F.data == builder_add_task_description[1])
+                async def save_task_without_description(callback: types.CallbackQuery):
+                    await add_task(tg_id, task_name)
+
     except Exception as e:
         logger.log("error", f"Произошла ошибка в хэндлере /add_task {str(e)}")
         await message.answer('Возникла неизвестная ошибка на стороне бота, в течение 6 часов будет решена проблема')

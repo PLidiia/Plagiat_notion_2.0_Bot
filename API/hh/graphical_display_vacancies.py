@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from get_vacancy import middle_salary_vacancies
-from record_vacancies_csv import record_csv
+from API.hh.get_vacancy import middle_salary_vacancies
+from API.hh.record_vacancies_csv import record_csv
 
 
 def draw_diagram(text):

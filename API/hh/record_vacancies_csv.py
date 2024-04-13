@@ -1,5 +1,5 @@
 import csv
-from get_vacancy import get_vacancies
+from API.hh.get_vacancy import get_vacancies
 
 
 def record_csv(text):

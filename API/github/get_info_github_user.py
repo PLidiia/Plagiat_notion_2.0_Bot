@@ -12,14 +12,17 @@ def response_github(url):
 
 
 load_dotenv()
-url_user = 'https://api.github.com/user'
-json_response_1 = response_github(url_user)
-user_id = json_response_1['id']
-url_repos = json_response_1['repos_url']
-json_response_2 = response_github(url_repos)
-for item in json_response_2:
-    id = item['owner']['id']
-    if id == user_id:
-        print('УРА проект делал сам автор')
-    else:
-        print('Ложь это не его проект')
+
+
+def repos_info():
+    url_user = 'https://api.github.com/user'
+    json_response_1 = response_github(url_user)
+    user_id = json_response_1['id']
+    url_repos = json_response_1['repos_url']
+    json_response_2 = response_github(url_repos)
+    for item in json_response_2:
+        id = item['owner']['id']
+        if id == user_id:
+            print('УРА проект делал сам автор')
+        else:
+            print('Ложь это не его проект')
